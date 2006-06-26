@@ -14,15 +14,12 @@ BOOL	sc(char*, char*);
 
 int	main(int argc, char *argv[]) {
 
-VXI11_CLIENT	*client;
-VXI11_LINK	*link;
 static char	*progname;
 static char	*serverIP;
 char		chnl; /* we use '1' to '4' for channels, and 'A' to 'D' for FUNC[1...4] */
 FILE		*f_wf;
 char 		wfname[256];
 char 		wfiname[256];
-char 		cmd[256];
 long		buf_size;
 char		*buf;
 unsigned long	timeout=10000; /* in ms (= 10 seconds) */
@@ -37,7 +34,9 @@ double		s_rate=0;
 long		npoints=0;
 double		actual_s_rate;
 long		actual_npoints;
+CLINK		*clink; /* client link (actually a structure contining CLIENT and VXI11_LINK pointers) */
 
+	clink = new CLINK; /* allocate some memory */
 	progname = argv[0];
 
 	while(index<argc){
@@ -62,7 +61,7 @@ long		actual_npoints;
 			}
 
 		if(sc(argv[index],"-no_points")||sc(argv[index],"-n")||sc(argv[index],"-points")){
-			sscanf(argv[++index],"%lu",&npoints);
+			sscanf(argv[++index],"%ld",&npoints);
 			}
 			
 		if(sc(argv[index],"-timeout")||sc(argv[index],"-t")){
@@ -96,15 +95,17 @@ long		actual_npoints;
 	if (f_wf > 0) {
 	/* This utility illustrates the general idea behind how data is acquired.
 	 * First we open the device, referenced by an IP address, and obtain
-	 * a client id, and a link id. Each client can have more than one link */
+	 * a client id, and a link id, all contained in a "CLINK" structure.  Each
+	 * client can have more than one link. For simplicity we bundle them together. */
 
-		if (vxi11_open_device(serverIP,&client,&link) != 0) {
+		if (vxi11_open_device(serverIP,clink) != 0) {
 			printf("Quitting...\n");
 			exit(2);
 			}
+
 	/* Next we do some trivial initialisation. This sets LSB first, binary 
 	 * word transfer, etc. A good opportunity to check we can talk to the scope. */
-		if (agilent_init(client, link) !=0 ) {
+		if (agilent_init(clink) !=0 ) {
 			printf("Quitting...\n");
 			exit(2);
 			}
@@ -117,7 +118,7 @@ long		actual_npoints;
 	 * approach a lot less confusing. You may have your own opinions. Passing
 	 * values <=0 for s_rate or npoints means they will be assigned automatically;
 	 * stating positive values for both, the sample rate takes precedence. */
-		agilent_set_for_capture(client, link, s_rate, npoints, timeout);
+		agilent_set_for_capture(clink, s_rate, npoints, timeout);
 
 	/* We need to know how big an array we need to hold all the data. This is
 	 * not necessarily simply related to npoints; it may depend on whether
@@ -143,8 +144,9 @@ long		actual_npoints;
 	 * function with a "write the wfi file" function, to save on a bit of
 	 * overhead. So, in _this_ instance, the actual acquisition (digitisation)
 	 * is performed here. */
-		buf_size = agilent_write_wfi_file(client, link, wfiname, chnl, progname, 1, timeout);
+		buf_size = agilent_write_wfi_file(clink, wfiname, chnl, progname, 1, timeout);
 		buf=new char[buf_size];
+
 	/* This is where we transfer the data from the scope to the PC. Note the
 	 * fourth argument, "0"; this tells the function not to do a digitisation.
 	 * Normally, calling this function repetetively to acquire several traces,
@@ -153,7 +155,7 @@ long		actual_npoints;
 	 * optimisation; if you have a large npoints, many averages, and a slow-
 	 * triggered signal, you do not want to be waiting 2 or 3 times for no
 	 * good reason! */
-		bytes_returned = agilent_get_data(client, link, chnl, 0, buf, buf_size, timeout);
+		bytes_returned = agilent_get_data(clink, chnl, 0, buf, buf_size, timeout);
 		if (bytes_returned <=0) {
 			printf("Problem reading the data, quitting...\n");
 			exit(2);
@@ -161,10 +163,8 @@ long		actual_npoints;
 
 		//agilent_report_status(client, link, timeout);
 
-		strcpy(cmd, ":ACQ:SRAT?");
-		actual_s_rate = vxi11_obtain_double_value(client, link, cmd);
-		strcpy(cmd, ":ACQ:POINTS?");
-		actual_npoints = vxi11_obtain_long_value(client, link, cmd);
+		actual_s_rate = vxi11_obtain_double_value(clink, ":ACQ:SRAT?");
+		actual_npoints = vxi11_obtain_long_value(clink, ":ACQ:POINTS?");
 		printf("Sample rate used: %g (%g GSa/s); acquisition points: %ld\n",actual_s_rate, (actual_s_rate/1e9),actual_npoints);
 
 	/* Now that everything is done, we can return the scope back to its usual
@@ -173,13 +173,13 @@ long		actual_npoints;
 	 * running out of points, sample rate, or the scope becoming sluggish.
 	 * You would only want to do this after everything is done, do not call
 	 * this function if you want to do any more acquisition. */
-		agilent_set_for_auto(client, link);
+		agilent_set_for_auto(clink);
 		fwrite(buf, sizeof(char), bytes_returned, f_wf);
 		fclose(f_wf);
 		delete[] buf;
 
 	/* Finally we sever the link to the client. */
-		vxi11_close_device(serverIP,client,link);
+		vxi11_close_device(serverIP,clink);
 		}
 	else {
 		printf("error: could not open file for writing, quitting...\n");
@@ -191,24 +191,24 @@ long		actual_npoints;
  * Another way of going through the acquisition loop, which is more relevant to
  * acquiring multiple waveforms, is as follows:
 
-	vxi11_open_device(serverIP,&client,&link);
-	agilent_init(client, link);
-	agilent_set_for_capture(client, link, s_rate, npoints, timeout);
-	buf_size = agilent_calculate_no_of_bytes(client, link, chnl, timeout); // performs :DIG
+	vxi11_open_device(serverIP,clink);
+	agilent_init(clink);
+	agilent_set_for_capture(clink, s_rate, npoints, timeout);
+	buf_size = agilent_calculate_no_of_bytes(clink, chnl, timeout); // performs :DIG
 	buf = new char[buf_size];
 	count=0;
 	do { // note for first acquisition no :DIG is done, then it is for each one after
-		bytes_returned = agilent_get_data(client, link, chnl, count++, buf, buf_size, timeout);
+		bytes_returned = agilent_get_data(clink, chnl, count++, buf, buf_size, timeout);
 		<append trace to wf file>;
 		} while (<some condition>);
 
 	// Note we are sending the function the buf_size instead of the chnl; no digitisation
 	// needs to be done (however you must take care that the scope has not been adjusted
 	// since the last acquisition)
-	ret = agilent_write_wfi_file(client, link, wfiname, buf_size, progname, count, timeout);
-	agilent_set_for_auto(client, link);
+	ret = agilent_write_wfi_file(clink, wfiname, buf_size, progname, count, timeout);
+	agilent_set_for_auto(clink);
 	delete[] buf;
-	vxi11_close_device(serverIP,client,link);
+	vxi11_close_device(serverIP,clink);
  */
 
 /* string compare (sc) function for parsing... ignore */
