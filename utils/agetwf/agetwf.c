@@ -145,7 +145,6 @@ long		actual_npoints;
 	 * is performed here. */
 		buf_size = agilent_write_wfi_file(client, link, wfiname, chnl, progname, 1, timeout);
 		buf=new char[buf_size];
-
 	/* This is where we transfer the data from the scope to the PC. Note the
 	 * fourth argument, "0"; this tells the function not to do a digitisation.
 	 * Normally, calling this function repetetively to acquire several traces,
@@ -163,9 +162,9 @@ long		actual_npoints;
 		//agilent_report_status(client, link, timeout);
 
 		strcpy(cmd, ":ACQ:SRAT?");
-		actual_s_rate = vxi11_obtain_double_value(client, link, cmd, strlen(cmd));
+		actual_s_rate = vxi11_obtain_double_value(client, link, cmd);
 		strcpy(cmd, ":ACQ:POINTS?");
-		actual_npoints = vxi11_obtain_long_value(client, link, cmd, strlen(cmd));
+		actual_npoints = vxi11_obtain_long_value(client, link, cmd);
 		printf("Sample rate used: %g (%g GSa/s); acquisition points: %ld\n",actual_s_rate, (actual_s_rate/1e9),actual_npoints);
 
 	/* Now that everything is done, we can return the scope back to its usual
