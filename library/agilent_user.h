@@ -14,5 +14,6 @@ long	agilent_write_wfi_file(CLINK *clink, char *wfiname, char chan, char *captur
 long	agilent_write_wfi_file(CLINK *clink, char *wfiname, long no_of_bytes, char *captured_by, int no_of_traces, unsigned long timeout);
 long	agilent_calculate_no_of_bytes(CLINK *clink, char chan, unsigned long timeout);
 void	agilent_scope_channel_str(char chan, char *source);
+int	agilent_set_averages(CLINK *clink, int no_averages);
 
 

@@ -453,9 +453,6 @@ long	bytes_returned;
 	return bytes_returned;
 	}
 
-
-
-
 int	agilent_get_preamble(CLINK *clink, char* buf, unsigned long buf_len) {
 int	ret;
 long	bytes_returned;
@@ -471,3 +468,20 @@ long	bytes_returned;
 	return (int) bytes_returned;
 	}
 
+/* Sets the number of averages. If no_averages <= 0 then the averaging is turned
+ * off; otherwise the no_averages is set and averaging is turned on. No checking
+ * is done for limits. If you enter a number greater than the scope it able to 
+ * cope with, it (from experience so far) sets the number of averages to its
+ * maximum capability. */
+int	agilent_set_averages(CLINK *clink, int no_averages) {
+char	cmd[256];
+
+	if (no_averages <= 0) {
+		return vxi11_send(clink, ":ACQ:AVER 0");
+		}
+	else {
+		sprintf(cmd, ":ACQ:COUNT %d", no_averages);
+		vxi11_send(clink, cmd);
+		return vxi11_send(clink, ":ACQ:AVER 1");
+		}
+	}
