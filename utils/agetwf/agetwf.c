@@ -29,6 +29,8 @@ BOOL		clear_sweeps=FALSE;
 BOOL		got_ip=FALSE;
 BOOL		got_scope_channel=FALSE;
 BOOL		got_file=FALSE;
+BOOL		got_no_averages=FALSE;
+int		no_averages;
 int		index=1;
 double		s_rate=0;
 long		npoints=0;
@@ -64,6 +66,11 @@ CLINK		*clink; /* client link (actually a structure contining CLIENT and VXI11_L
 			sscanf(argv[++index],"%ld",&npoints);
 			}
 			
+		if(sc(argv[index],"-averages")||sc(argv[index],"-a")||sc(argv[index],"-aver")){
+			sscanf(argv[++index],"%d",&no_averages);
+			got_no_averages=TRUE;
+			}
+			
 		if(sc(argv[index],"-timeout")||sc(argv[index],"-t")){
 			sscanf(argv[++index],"%lu",&timeout);
 			}
@@ -81,7 +88,8 @@ CLINK		*clink; /* client link (actually a structure contining CLIENT and VXI11_L
 		printf("OPTIONAL ARGUMENTS:\n");
 		printf("-t     -timeout                 : timout (in milliseconds)\n");
 		printf("-s     -sample_rate    -rate    : set sample rate (eg 1e9 = 1GS/s)\n");
-		printf("-n     -no_points      -points  : set minimum no of points\n\n");
+		printf("-n     -no_points      -points  : set minimum no of points\n");
+		printf("-a     -averages       -aver    : set no of averages (<=0 means none)\n\n");
 		printf("OUTPUTS:\n");
 		printf("filename.wf  : binary data of waveform\n");
 		printf("filename.wfi : waveform information (text)\n\n");
@@ -119,6 +127,10 @@ CLINK		*clink; /* client link (actually a structure contining CLIENT and VXI11_L
 	 * values <=0 for s_rate or npoints means they will be assigned automatically;
 	 * stating positive values for both, the sample rate takes precedence. */
 		agilent_set_for_capture(clink, s_rate, npoints, timeout);
+
+	/* If we've specified the number of averages, then set it. Otherwise, just
+	 * leave the scope in the condition it's in, in that respect. */
+		if (got_no_averages == TRUE) agilent_set_averages(clink, no_averages);
 
 	/* We need to know how big an array we need to hold all the data. This is
 	 * not necessarily simply related to npoints; it may depend on whether
