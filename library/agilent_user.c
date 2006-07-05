@@ -436,15 +436,16 @@ char	cmd[256];
 int	ret;
 long	bytes_returned;
 
+	memset(source,0,20);
+	agilent_scope_channel_str(chan, source);
+	sprintf(cmd,":WAV:SOURCE %s",source);
+	ret=vxi11_send(clink, cmd);
+	if(ret < 0) {
+		printf("error, could not send :WAV:SOURCE %s cmd, quitting...\n",source);
+		return ret;
+		}
+
 	if (digitise != 0) {
-		memset(source,0,20);
-		agilent_scope_channel_str(chan, source);
-		sprintf(cmd,":WAV:SOURCE %s",source);
-		ret=vxi11_send(clink, cmd);
-		if(ret < 0) {
-			printf("error, could not send :WAV:SOURCE %s cmd, quitting...\n",source);
-			return ret;
-			}
 		ret=vxi11_send(clink, ":DIG");
 		}
 	memset(cmd,0,256);
