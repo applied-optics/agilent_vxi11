@@ -485,3 +485,13 @@ char	cmd[256];
 		return vxi11_send(clink, ":ACQ:AVER 1");
 		}
 	}
+
+/* Get sample rate. Trivial, but used quite often, so worth a little wrapper fn */
+double	agilent_get_sample_rate(CLINK *clink) {
+	return vxi11_obtain_double_value(clink, ":ACQ:SRAT?");
+	}
+
+/* Get no of points (may not necessarily relate to no of bytes directly!) */
+long	agilent_get_n_points(CLINK *clink) {
+	return vxi11_obtain_long_value(clink, ":ACQ:POINTS?");
+	}
