@@ -1,5 +1,16 @@
 #include "agilent_user.h"
 
+/* This really is just a wrapper. Only here because folk might be uncomfortable
+ * using commands from the vxi11_user library directly! */
+int	agilent_open(char *ip, CLINK *clink) {
+	return vxi11_open_device(ip, clink);
+	}
+
+/* Again, just a wrapper */
+int	agilent_close(char *ip, CLINK *clink) {
+	return vxi11_close_device(ip, clink);
+	}
+
 /* Set up some fundamental settings for data transfer. It's possible
  * (although not certain) that some or all of these would be reset after
  * a system reset. It's a very tiny overhead right at the beginning of your
