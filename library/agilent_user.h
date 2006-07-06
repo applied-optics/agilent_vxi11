@@ -1,5 +1,7 @@
 #include "../../vxi11/vxi11_user.h"
 
+int	agilent_open(char *ip, CLINK *clink);
+int	agilent_close(char *ip, CLINK *clink);
 int	agilent_init(CLINK *clink);
 int	agilent_report_status(CLINK *clink, unsigned long timeout);
 int	agilent_get_setup(CLINK *clink, char *buf, unsigned long buf_len);
