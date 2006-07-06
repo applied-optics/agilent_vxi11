@@ -106,7 +106,7 @@ CLINK		*clink; /* client link (actually a structure contining CLIENT and VXI11_L
 	 * a client id, and a link id, all contained in a "CLINK" structure.  Each
 	 * client can have more than one link. For simplicity we bundle them together. */
 
-		if (vxi11_open_device(serverIP,clink) != 0) {
+		if (agilent_open(serverIP,clink) != 0) { // could also use "vxi11_open_device()"
 			printf("Quitting...\n");
 			exit(2);
 			}
@@ -191,7 +191,7 @@ CLINK		*clink; /* client link (actually a structure contining CLIENT and VXI11_L
 		delete[] buf;
 
 	/* Finally we sever the link to the client. */
-		vxi11_close_device(serverIP,clink);
+		agilent_close(serverIP,clink); // could also use "vxi11_close_device()"
 		}
 	else {
 		printf("error: could not open file for writing, quitting...\n");
@@ -203,7 +203,7 @@ CLINK		*clink; /* client link (actually a structure contining CLIENT and VXI11_L
  * Another way of going through the acquisition loop, which is more relevant to
  * acquiring multiple waveforms, is as follows:
 
-	vxi11_open_device(serverIP,clink);
+	agilent_open(serverIP,clink);
 	agilent_init(clink);
 	agilent_set_for_capture(clink, s_rate, npoints, timeout);
 	buf_size = agilent_calculate_no_of_bytes(clink, chnl, timeout); // performs :DIG
@@ -220,7 +220,7 @@ CLINK		*clink; /* client link (actually a structure contining CLIENT and VXI11_L
 	ret = agilent_write_wfi_file(clink, wfiname, buf_size, progname, count, timeout);
 	agilent_set_for_auto(clink);
 	delete[] buf;
-	vxi11_close_device(serverIP,clink);
+	agilent_close(serverIP,clink);
  */
 
 /* string compare (sc) function for parsing... ignore */
