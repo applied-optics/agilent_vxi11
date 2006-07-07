@@ -1,3 +1,39 @@
+/* $Id$ */
+
+/*
+ * $Log$
+ */
+
+/* agilent_save_setup.c
+ * Copyright (C) 2006 Steve D. Sharples
+ *
+ * Command line utility to save the setup of an Agilent Infiniium (and possibly
+ * other model) oscilloscope, and save it in an Agilent Scope Setup (.ass)
+ * file for future use. As well as performing a useful function, it also
+ * illustrates the very simple steps required to begin communicating with your
+ * scope from Linux over ethernet, via the VXI11 RPC protocol.
+ *
+ * You will also need the
+ * vxi11_X.XX.tar.gz source, currently available from:
+ * http://optics.eee.nottingham.ac.uk/vxi11/
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ *
+ * The author's email address is steve.sharples@nottingham.ac.uk
+ */
+
 #include "../../library/agilent_user.h"
 #define BUF_LEN 30000
 

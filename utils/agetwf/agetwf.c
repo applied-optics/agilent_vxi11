@@ -1,3 +1,47 @@
+/* $Id$ */
+
+/*
+ * $Log$
+ */
+
+/* agetwf.c
+ * Copyright (C) 2006 Steve D. Sharples
+ *
+ * Command line utility to acquire traces from Agilent Infiniium oscilloscopes.
+ * After compiling, run it without any arguments for help info.
+ * For historical reasons, we have our own data format for scope trace data.
+ * Each trace consists of a trace.wf file that contains the binary data, and a
+ * trace.wfi text file that contains the waveform info. We then use a very
+ * cheesy Matlab script, loadwf.m to load the data into Matlab. The wfi file
+ * does not contain all the information that Agilent's own "preamble"
+ * information contains; on the other hand, you can have multiple traces in
+ * the same wf file.
+ *
+ * The source is extensively commented and from this, and a look at the 
+ * agilent_user.c library, you will begin to understand the approach to 
+ * acquiring data that I've taken.
+ *
+ * You will also need the
+ * vxi11_X.XX.tar.gz source, currently available from:
+ * http://optics.eee.nottingham.ac.uk/vxi11/
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ *
+ * The author's email address is steve.sharples@nottingham.ac.uk
+ */
+
 #include "../../library/agilent_user.h"
 
 #ifndef	BOOL
