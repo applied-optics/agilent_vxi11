@@ -2,6 +2,9 @@
 
 /*
  * $Log$
+ * Revision 1.8  2006/07/06 21:16:39  sds
+ * added revision info, short description, and GNU GPL license.
+ *
  */
 
 /* agilent_user.c
@@ -491,8 +494,11 @@ long	bytes_returned;
 		ret=vxi11_send(clink, ":DIG");
 		}
 	memset(cmd,0,256);
-	ret=vxi11_send(clink, ":WAV:DATA?");
-	bytes_returned=vxi11_receive_data_block(clink, buf, buf_len, timeout);
+	do {
+		ret=vxi11_send(clink, ":WAV:DATA?");
+		bytes_returned=vxi11_receive_data_block(clink, buf, buf_len, timeout);
+		} while (bytes_returned == -VXI11_NULL_READ_RESP);
+		/* We have to check for this after a :DIG because it could take a very long time */
 	return bytes_returned;
 	}
 
