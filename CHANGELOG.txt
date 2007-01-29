@@ -1,4 +1,19 @@
 ------------------------------------------------------------------------------
+agilent_scope_1.01 - 29/01/2007
+
+No changes to the utilities. Two changes to the agilent_user library:
+
+(1) a minor enhancement: added agilent_get_averages() function.
+
+(2) a bug-fix, related to the changes in release 1.03 of the vxi11 library.
+    If you do not use release 1.03 or later of the vxi11 library, then this
+    bug-fix will not be effective.
+    In agilent_get_data(), added a check (after :DIG) to see if
+    vxi11_receive_data_block() returns -VXI11_NULL_READ_RESP (meaning
+    instrument has ignored query but not returned aproper error). If so,
+    has another go.
+
+------------------------------------------------------------------------------
 agilent_scope_1.00 - 06/07/2006
 
 Initial release. Probably buggy.
