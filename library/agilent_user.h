@@ -2,6 +2,9 @@
 
 /*
  * $Log$
+ * Revision 1.6  2006/07/06 21:17:48  sds
+ * added revision info, short description, and GNU GPL license.
+ *
  */
 
 /* agilent_user.h
@@ -48,6 +51,7 @@ long	agilent_write_wfi_file(CLINK *clink, char *wfiname, long no_of_bytes, char 
 long	agilent_calculate_no_of_bytes(CLINK *clink, char chan, unsigned long timeout);
 void	agilent_scope_channel_str(char chan, char *source);
 int	agilent_set_averages(CLINK *clink, int no_averages);
+long	agilent_get_averages(CLINK *clink);
 double	agilent_get_sample_rate(CLINK *clink);
 long	agilent_get_n_points(CLINK *clink);
 

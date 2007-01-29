@@ -2,6 +2,12 @@
 
 /*
  * $Log$
+ * Revision 1.9  2006/12/08 12:04:01  ijc
+ * in agilent_get_data(), added a check (after :DIG) to see if
+ * vxi11_receive_data_block() returns -VXI11_NULL_READ_RESP
+ * (meaning instrument has ignored query but not returned a
+ * proper error). If so, has another go.
+ *
  * Revision 1.8  2006/07/06 21:16:39  sds
  * added revision info, short description, and GNU GPL license.
  *
@@ -533,6 +539,17 @@ char	cmd[256];
 		vxi11_send(clink, cmd);
 		return vxi11_send(clink, ":ACQ:AVER 1");
 		}
+	}
+
+/* Gets the number of averages. If acq:aver==0 then returns 0, otherwise
+ * returns the actual no of averages. */
+long	agilent_get_averages(CLINK *clink) {
+long	result;
+
+	result=vxi11_obtain_long_value(clink,":ACQ:AVER?");
+	if (result==0) return 0;
+	result=vxi11_obtain_long_value(clink,":ACQ:COUNT?");
+	return result;
 	}
 
 /* Get sample rate. Trivial, but used quite often, so worth a little wrapper fn */
