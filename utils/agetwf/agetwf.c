@@ -2,6 +2,9 @@
 
 /*
  * $Log$
+ * Revision 1.6  2006/07/07 07:32:07  sds
+ * added revision info, short description, and GNU GPL license.
+ *
  */
 
 /* agetwf.c
@@ -54,7 +57,7 @@
 #define	FALSE	0
 #endif
 
-BOOL	sc(char*, char*);
+BOOL	sc(const char*, const char*);
 
 int	main(int argc, char *argv[]) {
 
@@ -268,7 +271,7 @@ CLINK		*clink; /* client link (actually a structure contining CLIENT and VXI11_L
  */
 
 /* string compare (sc) function for parsing... ignore */
-BOOL	sc(char *con,char *var){
+BOOL	sc(const char *con, const char *var){
 	if(strcmp(con,var)==0){
 		return TRUE;
 		}
