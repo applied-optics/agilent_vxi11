@@ -2,6 +2,10 @@
 
 /*
  * $Log$
+ * Revision 1.7  2007/10/30 16:22:49  sds
+ * changed char*'s in sc() to const char*'s to get rid of
+ * pedantic gcc warning.
+ *
  * Revision 1.6  2006/07/07 07:32:07  sds
  * added revision info, short description, and GNU GPL license.
  *
@@ -178,6 +182,9 @@ CLINK		*clink; /* client link (actually a structure contining CLIENT and VXI11_L
 	/* If we've specified the number of averages, then set it. Otherwise, just
 	 * leave the scope in the condition it's in, in that respect. */
 		if (got_no_averages == TRUE) agilent_set_averages(clink, no_averages);
+
+	/* We make sure the channel we want to grab data from is turned on */
+		agilent_display_channel(clink, chnl, 1);
 
 	/* We need to know how big an array we need to hold all the data. This is
 	 * not necessarily simply related to npoints; it may depend on whether
