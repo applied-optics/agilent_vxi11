@@ -1,4 +1,24 @@
 ------------------------------------------------------------------------------
+agilent_scope_1.02 - 16/10/2009
+
+Extra function: agilent_display_channel(). Allows you to turn on or off a
+channel or maths function. Useful for a couple of circumstances:
+
+(1) ensure the channel you want to acquire data from is turned on (agetwf now
+    does this)
+
+(2) turn off unnecessary channels to optimise acquisition speed. This is
+    generally intuitive... if you are performing averaging with high numbers
+    of averages, you perhaps won't be surprised to hear that it takes longer
+    to acquire one channel's worth of data if you have all 4 channels on, than
+    if you have just that channel turned on. In some circumstances though,
+    it's counter-intuitive. For example, imagine you want to grab data off
+    channel 2. You have a 1kHz trigger, timebase=100ns, sample rate=10GSa/s,
+    and 4096 averages. It's actually QUICKER if you have channels 1 and 2
+    turned ON, rather than just channel 2. If you have channels 2 and 3 turned
+    on though, it's SLOWER than if you just have channel 2 on.
+
+------------------------------------------------------------------------------
 agilent_scope_1.01 - 29/01/2007
 
 No changes to the utilities. Two changes to the agilent_user library:
