@@ -2,6 +2,9 @@
 
 /*
  * $Log$
+ * Revision 1.10  2007/01/29 10:02:33  sds
+ * added agilent_get_averages() function.
+ *
  * Revision 1.9  2006/12/08 12:04:01  ijc
  * in agilent_get_data(), added a check (after :DIG) to see if
  * vxi11_receive_data_block() returns -VXI11_NULL_READ_RESP
@@ -561,3 +564,15 @@ double	agilent_get_sample_rate(CLINK *clink) {
 long	agilent_get_n_points(CLINK *clink) {
 	return vxi11_obtain_long_value(clink, ":ACQ:POINTS?");
 	}
+
+/* Turns a channel on or off (pass "1" for on, "0" for off)*/
+int	agilent_display_channel(CLINK *clink, char chan, int on_or_off) {
+char	source[20];
+char	cmd[256];
+
+	memset(source,0,20);
+	agilent_scope_channel_str(chan, source);
+	sprintf(cmd, ":%s:DISP %d", source, on_or_off);
+	return vxi11_send(clink, cmd);
+	}
+

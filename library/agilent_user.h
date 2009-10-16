@@ -2,6 +2,9 @@
 
 /*
  * $Log$
+ * Revision 1.7  2007/01/29 10:01:36  sds
+ * added agilent_get_averages() function.
+ *
  * Revision 1.6  2006/07/06 21:17:48  sds
  * added revision info, short description, and GNU GPL license.
  *
@@ -54,4 +57,4 @@ int	agilent_set_averages(CLINK *clink, int no_averages);
 long	agilent_get_averages(CLINK *clink);
 double	agilent_get_sample_rate(CLINK *clink);
 long	agilent_get_n_points(CLINK *clink);
-
+int	agilent_display_channel(CLINK *clink, char chan, int on_or_off);
