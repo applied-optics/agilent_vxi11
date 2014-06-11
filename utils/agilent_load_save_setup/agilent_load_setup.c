@@ -1,7 +1,10 @@
-/* $Id$ */
+/* $Id: agilent_load_setup.c,v 1.2 2006/07/07 07:32:50 sds Exp $ */
 
 /*
- * $Log$
+ * $Log: agilent_load_setup.c,v $
+ * Revision 1.2  2006/07/07 07:32:50  sds
+ * added revision info, short description, and GNU GPL license.
+ *
  */
 
 /* agilent_load_setup.c

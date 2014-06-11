@@ -1,7 +1,11 @@
-/* $Id$ */
+/* $Id: agilent_user.c,v 1.11 2009/10/16 09:50:45 sds Exp $ */
 
 /*
- * $Log$
+ * $Log: agilent_user.c,v $
+ * Revision 1.11  2009/10/16 09:50:45  sds
+ * Added agilent_display_channel() fn, to turn a channel or function
+ * on or off.
+ *
  * Revision 1.10  2007/01/29 10:02:33  sds
  * added agilent_get_averages() function.
  *

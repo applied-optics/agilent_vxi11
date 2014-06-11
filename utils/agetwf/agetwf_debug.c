@@ -1,15 +1,7 @@
-/* $Id: agetwf.c,v 1.8 2009/10/16 09:48:48 sds Exp sds $ */
+/* $Id: agetwf.c,v 1.6 2006/07/07 07:32:07 sds Exp sds $ */
 
 /*
  * $Log: agetwf.c,v $
- * Revision 1.8  2009/10/16 09:48:48  sds
- * Calls the new function agilent_display_channel() to ensure the channel
- * we want to acquire a trace from is turned on.
- *
- * Revision 1.7  2007/10/30 16:22:49  sds
- * changed char*'s in sc() to const char*'s to get rid of
- * pedantic gcc warning.
- *
  * Revision 1.6  2006/07/07 07:32:07  sds
  * added revision info, short description, and GNU GPL license.
  *
@@ -65,7 +57,7 @@
 #define	FALSE	0
 #endif
 
-BOOL	sc(const char*, const char*);
+BOOL	sc(char*, char*);
 
 int	main(int argc, char *argv[]) {
 
@@ -86,19 +78,27 @@ BOOL		got_scope_channel=FALSE;
 BOOL		got_file=FALSE;
 BOOL		got_no_averages=FALSE;
 int		no_averages;
-BOOL		got_no_segments=FALSE;
-int		no_segments;
 int		index=1;
 double		s_rate=0;
 long		npoints=0;
 double		actual_s_rate;
 long		actual_npoints;
 CLINK		*clink; /* client link (actually a structure contining CLIENT and VXI11_LINK pointers) */
-int		l;
-char		cmd[256];
 
 	clink = new CLINK; /* allocate some memory */
 	progname = argv[0];
+
+	got_file=TRUE;
+	got_scope_channel=TRUE;
+	got_ip=TRUE;
+
+	snprintf(wfname,256,"%s.wf","test");
+	snprintf(wfiname,256,"%s.wf","test");
+	serverIP="128.243.74.232";
+	chnl='1';
+	no_averages=1024;
+	got_no_averages=TRUE;
+	timeout=30000;
 
 	while(index<argc){
 		if(sc(argv[index],"-filename")||sc(argv[index],"-f")||sc(argv[index],"-file")){
@@ -130,11 +130,6 @@ char		cmd[256];
 			got_no_averages=TRUE;
 			}
 			
-		if(sc(argv[index],"-segmented")||sc(argv[index],"-seg")||sc(argv[index],"-segm")){
-			sscanf(argv[++index],"%d",&no_segments);
-			got_no_segments=TRUE;
-			}
-			
 		if(sc(argv[index],"-timeout")||sc(argv[index],"-t")){
 			sscanf(argv[++index],"%lu",&timeout);
 			}
@@ -154,7 +149,6 @@ char		cmd[256];
 		printf("-s     -sample_rate    -rate    : set sample rate (eg 1e9 = 1GS/s)\n");
 		printf("-n     -no_points      -points  : set minimum no of points\n");
 		printf("-a     -averages       -aver    : set no of averages (<=0 means none)\n\n");
-		printf("-seg   -segmented      -segm    : set no of segments (<=0 means none)\n\n");
 		printf("OUTPUTS:\n");
 		printf("filename.wf  : binary data of waveform\n");
 		printf("filename.wfi : waveform information (text)\n\n");
@@ -197,11 +191,6 @@ char		cmd[256];
 	 * leave the scope in the condition it's in, in that respect. */
 		if (got_no_averages == TRUE) agilent_set_averages(clink, no_averages);
 
-	/* We make sure the channel we want to grab data from is turned on */
-		agilent_display_channel(clink, chnl, 1);
-
-	/* If number of segments specified, then set to segmented mode */
-
 	/* We need to know how big an array we need to hold all the data. This is
 	 * not necessarily simply related to npoints; it may depend on whether
 	 * interpolation (sinx/x) is turned on, the timebase, available memory
@@ -226,9 +215,8 @@ char		cmd[256];
 	 * function with a "write the wfi file" function, to save on a bit of
 	 * overhead. So, in _this_ instance, the actual acquisition (digitisation)
 	 * is performed here. */
-		if(got_no_segments == FALSE) {
-			buf_size = agilent_write_wfi_file(clink, wfiname, chnl, progname, 1, timeout);
-			buf=new char[buf_size];
+		buf_size = agilent_write_wfi_file(clink, wfiname, chnl, progname, 1, timeout);
+		buf=new char[buf_size];
 
 	/* This is where we transfer the data from the scope to the PC. Note the
 	 * fourth argument, "0"; this tells the function not to do a digitisation.
@@ -238,30 +226,11 @@ char		cmd[256];
 	 * optimisation; if you have a large npoints, many averages, and a slow-
 	 * triggered signal, you do not want to be waiting 2 or 3 times for no
 	 * good reason! */
-			bytes_returned = agilent_get_data(clink, chnl, 0, buf, buf_size, timeout);
-			if (bytes_returned <=0) {
-				printf("Problem reading the data, quitting...\n");
-				exit(2);
-				}
+		bytes_returned = agilent_get_data(clink, chnl, 0, buf, buf_size, timeout);
+		if (bytes_returned <=0) {
+			printf("Problem reading the data, quitting...\n");
+			exit(2);
 			}
-		else {
-			buf_size = agilent_write_wfi_file(clink, wfiname, chnl, progname, no_segments, timeout);
-			vxi11_send(clink, ":ACQ:MODE SEGMENTED");	
-			sprintf(cmd,":ACQ:SEGM:COUNT %d", no_segments);
-			vxi11_send(clink, cmd);
-			buf=new char[buf_size * no_segments];
-
-			for(l=0; l < no_segments; l++) {
-				sprintf(cmd,":ACQ:SEGM:INDEX %d", l+1);
-				vxi11_send(clink, cmd);
-				bytes_returned = agilent_get_data(clink, chnl, 0, buf + (l*buf_size), buf_size, timeout);
-				if (bytes_returned <=0) {
-					printf("Problem reading the data, quitting...\n");
-					exit(2);
-					}
-				}
-			}
-
 
 		//agilent_report_status(client, link, timeout);
 
@@ -276,13 +245,7 @@ char		cmd[256];
 	 * You would only want to do this after everything is done, do not call
 	 * this function if you want to do any more acquisition. */
 		agilent_set_for_auto(clink);
-		if(got_no_segments == FALSE) {
-			fwrite(buf, sizeof(char), bytes_returned, f_wf);
-			}
-		else {
-			fwrite(buf, sizeof(char), bytes_returned*no_segments, f_wf);
-			}
-			
+		fwrite(buf, sizeof(char), bytes_returned, f_wf);
 		fclose(f_wf);
 		delete[] buf;
 
@@ -320,7 +283,7 @@ char		cmd[256];
  */
 
 /* string compare (sc) function for parsing... ignore */
-BOOL	sc(const char *con, const char *var){
+BOOL	sc(char *con,char *var){
 	if(strcmp(con,var)==0){
 		return TRUE;
 		}
