@@ -29,19 +29,19 @@ int agilent_open(VXI11_CLINK ** clink, const char *ip);
 int agilent_close(VXI11_CLINK * clink, const char *ip);
 int agilent_init(VXI11_CLINK * clink);
 int agilent_report_status(VXI11_CLINK * clink, unsigned long timeout);
-int agilent_get_setup(VXI11_CLINK * clink, char *buf, unsigned long buf_len);
-int agilent_send_setup(VXI11_CLINK * clink, char *buf, unsigned long buf_len);
+int agilent_get_setup(VXI11_CLINK * clink, char *buf, size_t buf_len);
+int agilent_send_setup(VXI11_CLINK * clink, char *buf, size_t buf_len);
 long agilent_get_screen_data(VXI11_CLINK * clink, char chan, char *buf,
-			     unsigned long buf_len, unsigned long timeout,
+			     size_t buf_len, unsigned long timeout,
 			     double s_rate, long npoints);
 int agilent_set_for_capture(VXI11_CLINK * clink, double s_rate, long npoints,
 			    unsigned long timeout);
 void agilent_set_for_auto(VXI11_CLINK * clink);
 long agilent_get_data(VXI11_CLINK * clink, char chan, char *buf,
-		      unsigned long buf_len, unsigned long timeout);
+		      size_t buf_len, unsigned long timeout);
 long agilent_get_data(VXI11_CLINK * clink, char chan, int digitise, char *buf,
-		      unsigned long buf_len, unsigned long timeout);
-int agilent_get_preamble(VXI11_CLINK * clink, char *buf, unsigned long buf_len);
+		      size_t buf_len, unsigned long timeout);
+int agilent_get_preamble(VXI11_CLINK * clink, char *buf, size_t buf_len);
 long agilent_write_wfi_file(VXI11_CLINK * clink, char *wfiname, char chan,
 			    char *captured_by, int no_of_traces,
 			    unsigned long timeout);

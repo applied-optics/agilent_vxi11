@@ -107,7 +107,7 @@ int agilent_report_status(VXI11_CLINK * clink, unsigned long timeout)
 }
 
 /* Gets the system setup for the scope, dumps it in an array. Can be saved for later. */
-int agilent_get_setup(VXI11_CLINK * clink, char *buf, unsigned long buf_len)
+int agilent_get_setup(VXI11_CLINK * clink, char *buf, size_t buf_len)
 {
 	int ret;
 	long bytes_returned;
@@ -124,7 +124,7 @@ int agilent_get_setup(VXI11_CLINK * clink, char *buf, unsigned long buf_len)
 }
 
 /* Sends a previously saved system setup back to the scope. */
-int agilent_send_setup(VXI11_CLINK * clink, char *buf, unsigned long buf_len)
+int agilent_send_setup(VXI11_CLINK * clink, char *buf, size_t buf_len)
 {
 	int ret;
 	long bytes_returned;
@@ -293,7 +293,7 @@ long agilent_write_wfi_file(VXI11_CLINK * clink, char *wfiname, long no_of_bytes
  * make sure that you do this BEFORE you return the scope to automatic mode.
  */
 long agilent_get_screen_data(VXI11_CLINK * clink, char chan, char *buf,
-			     unsigned long buf_len, unsigned long timeout,
+			     size_t buf_len, unsigned long timeout,
 			     double s_rate, long npoints)
 {
 	long returned_bytes;
@@ -518,13 +518,13 @@ void agilent_scope_channel_str(char chan, char *source)
  * (safer but possibly slower, if you've already done a dig to get your wfi_file
  * info) */
 long agilent_get_data(VXI11_CLINK * clink, char chan, char *buf,
-		      unsigned long buf_len, unsigned long timeout)
+		      size_t buf_len, unsigned long timeout)
 {
 	return agilent_get_data(clink, chan, 1, buf, buf_len, timeout);
 }
 
 long agilent_get_data(VXI11_CLINK * clink, char chan, int digitise, char *buf,
-		      unsigned long buf_len, unsigned long timeout)
+		      size_t buf_len, unsigned long timeout)
 {
 	char source[20];
 	char cmd[256];
@@ -555,7 +555,7 @@ long agilent_get_data(VXI11_CLINK * clink, char chan, int digitise, char *buf,
 	return bytes_returned;
 }
 
-int agilent_get_preamble(VXI11_CLINK * clink, char *buf, unsigned long buf_len)
+int agilent_get_preamble(VXI11_CLINK * clink, char *buf, size_t buf_len)
 {
 	int ret;
 	long bytes_returned;
