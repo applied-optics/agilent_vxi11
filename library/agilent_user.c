@@ -23,43 +23,46 @@
  * The author's email address is steve.sharples@nottingham.ac.uk
  */
 
+#include <stdio.h>
+#include <string.h>
+
 #include "agilent_user.h"
 
 /* This really is just a wrapper. Only here because folk might be uncomfortable
  * using commands from the vxi11_user library directly! */
-int agilent_open(char *ip, CLINK * clink)
+int agilent_open(VXI11_CLINK ** clink, const char *ip)
 {
-	return vxi11_open_device(ip, clink);
+	return vxi11_open_device(clink, ip, NULL);
 }
 
 /* Again, just a wrapper */
-int agilent_close(char *ip, CLINK * clink)
+int agilent_close(VXI11_CLINK * clink, const char *ip)
 {
-	return vxi11_close_device(ip, clink);
+	return vxi11_close_device(clink, ip);
 }
 
 /* Set up some fundamental settings for data transfer. It's possible
  * (although not certain) that some or all of these would be reset after
  * a system reset. It's a very tiny overhead right at the beginning of your
  * acquisition that's performed just once. */
-int agilent_init(CLINK * clink)
+int agilent_init(VXI11_CLINK * clink)
 {
 	char cmd[256];
 	int ret;
-	ret = vxi11_send(clink, ":SYSTEM:HEADER 0");
+	ret = vxi11_send_str(clink, ":SYSTEM:HEADER 0");
 	if (ret < 0) {
 		printf("error in agilent init, could not send command '%s'\n",
 		       cmd);
 		return ret;
 	}
-	vxi11_send(clink, ":ACQUIRE:COMPLETE 100");
-	vxi11_send(clink, ":WAVEFORM:BYTEORDER LSBFIRST");
-	vxi11_send(clink, ":WAVEFORM:FORMAT BINARY");
+	vxi11_send_str(clink, ":ACQUIRE:COMPLETE 100");
+	vxi11_send_str(clink, ":WAVEFORM:BYTEORDER LSBFIRST");
+	vxi11_send_str(clink, ":WAVEFORM:FORMAT BINARY");
 	return 0;
 }
 
 /* Debugging function whilst developing the library. Might as well leave it here */
-int agilent_report_status(CLINK * clink, unsigned long timeout)
+int agilent_report_status(VXI11_CLINK * clink, unsigned long timeout)
 {
 	char buf[256];
 	double dval;
@@ -71,32 +74,32 @@ int agilent_report_status(CLINK * clink, unsigned long timeout)
 		return -1;
 	printf("Source:        %s", buf);
 
-	dval = vxi11_obtain_double_value(clink, ":tim:range?", timeout);
+	dval = vxi11_obtain_double_value_timeout(clink, ":tim:range?", timeout);
 	printf("Time range:    %g (%g us)\n", dval, (dval * 1e6));
 
-	dval = vxi11_obtain_double_value(clink, ":acq:srat?", timeout);
-	lval = vxi11_obtain_long_value(clink, ":acq:srat:auto?", timeout);
+	dval = vxi11_obtain_double_value_timeout(clink, ":acq:srat?", timeout);
+	lval = vxi11_obtain_long_value_timeout(clink, ":acq:srat:auto?", timeout);
 	printf("Sample rate:   %g (%g GS/s), set to ", dval, (dval / 1e9));
 	if (lval == 0)
 		printf("MANUAL\n");
 	else
 		printf("AUTO\n");
 
-	lval = vxi11_obtain_long_value(clink, ":acq:points?", timeout);
+	lval = vxi11_obtain_long_value_timeout(clink, ":acq:points?", timeout);
 	printf("No of points:  %ld, set to ", lval);
-	lval = vxi11_obtain_long_value(clink, ":acq:points:auto?", timeout);
+	lval = vxi11_obtain_long_value_timeout(clink, ":acq:points:auto?", timeout);
 	if (lval == 0)
 		printf("MANUAL\n");
 	else
 		printf("AUTO\n");
 
-	lval = vxi11_obtain_long_value(clink, ":acq:INT?", timeout);
+	lval = vxi11_obtain_long_value_timeout(clink, ":acq:INT?", timeout);
 	if (lval == 0)
 		printf("(sin x)/x:     OFF\n");
 	else
 		printf("(sin x)/x:     ON\n");
 
-	dval = vxi11_obtain_double_value(clink, ":wav:xinc?", timeout);
+	dval = vxi11_obtain_double_value_timeout(clink, ":wav:xinc?", timeout);
 	printf("xinc:          %g (%g us, %g ps)\n", dval, (dval * 1e6),
 	       (dval * 1e12));
 
@@ -104,12 +107,12 @@ int agilent_report_status(CLINK * clink, unsigned long timeout)
 }
 
 /* Gets the system setup for the scope, dumps it in an array. Can be saved for later. */
-int agilent_get_setup(CLINK * clink, char *buf, unsigned long buf_len)
+int agilent_get_setup(VXI11_CLINK * clink, char *buf, unsigned long buf_len)
 {
 	int ret;
 	long bytes_returned;
 
-	ret = vxi11_send(clink, ":SYSTEM:SETUP?");
+	ret = vxi11_send_str(clink, ":SYSTEM:SETUP?");
 	if (ret < 0) {
 		printf("error, could not ask for system setup, quitting...\n");
 		return ret;
@@ -121,7 +124,7 @@ int agilent_get_setup(CLINK * clink, char *buf, unsigned long buf_len)
 }
 
 /* Sends a previously saved system setup back to the scope. */
-int agilent_send_setup(CLINK * clink, char *buf, unsigned long buf_len)
+int agilent_send_setup(VXI11_CLINK * clink, char *buf, unsigned long buf_len)
 {
 	int ret;
 	long bytes_returned;
@@ -138,7 +141,7 @@ int agilent_send_setup(CLINK * clink, char *buf, unsigned long buf_len)
  * data will take up, based on timebase settings, whether interpolation is
  * turned on etc. Can be used before you actually acquire any data, to find
  * out how big you need your data buffer to be. */
-long agilent_calculate_no_of_bytes(CLINK * clink, char chan,
+long agilent_calculate_no_of_bytes(VXI11_CLINK * clink, char chan,
 				   unsigned long timeout)
 {
 	char cmd[256];
@@ -152,11 +155,11 @@ long agilent_calculate_no_of_bytes(CLINK * clink, char chan,
 	// waveform data. This is a pain in the arse.
 	agilent_scope_channel_str(chan, source);
 	sprintf(cmd, ":WAV:SOURCE %s", source);
-	vxi11_send(clink, cmd);
-	vxi11_send(clink, ":DIG");
+	vxi11_send_str(clink, cmd);
+	vxi11_send_str(clink, ":DIG");
 
 	/* Now find the info we need to calculate the number of points */
-	hinterval = vxi11_obtain_double_value(clink, ":WAV:XINC?", timeout);
+	hinterval = vxi11_obtain_double_value_timeout(clink, ":WAV:XINC?", timeout);
 	time_range = vxi11_obtain_double_value(clink, ":TIM:RANGE?");
 
 	/* Are we in equivalent time (ETIM) mode? If so, the value of ACQ:SRAT will
@@ -203,7 +206,7 @@ long agilent_calculate_no_of_bytes(CLINK * clink, char chan,
  * you should already know how many bytes per trace there are, and have 
  * also probably recently done a :DIG to capture your data; hence the 
  * second agilent_write_wfi_file() function. */
-long agilent_write_wfi_file(CLINK * clink, char *wfiname, char chan,
+long agilent_write_wfi_file(VXI11_CLINK * clink, char *wfiname, char chan,
 			    char *captured_by, int no_of_traces,
 			    unsigned long timeout)
 {
@@ -227,7 +230,7 @@ long agilent_write_wfi_file(CLINK * clink, char *wfiname, char chan,
  * no_of_bytes, from an earlier calling of the agilent_calculate_no_of_bytes()
  * function. Useful if you want to write your wfi file at the end of your
  * acquisition(s), but don't want to do another digitisation. */
-long agilent_write_wfi_file(CLINK * clink, char *wfiname, long no_of_bytes,
+long agilent_write_wfi_file(VXI11_CLINK * clink, char *wfiname, long no_of_bytes,
 			    char *captured_by, int no_of_traces,
 			    unsigned long timeout)
 {
@@ -238,7 +241,7 @@ long agilent_write_wfi_file(CLINK * clink, char *wfiname, long no_of_bytes,
 	/* Now find the other info we need to write the wfi-file */
 	/* (those paying attention will notice some repetition here,
 	 * it's just a bit more logical this way) */
-	hinterval = vxi11_obtain_double_value(clink, ":WAV:XINC?", timeout);
+	hinterval = vxi11_obtain_double_value_timeout(clink, ":WAV:XINC?", timeout);
 	hoffset = vxi11_obtain_double_value(clink, ":WAV:XORIGIN?");
 	vgain = vxi11_obtain_double_value(clink, ":WAV:YINC?");
 	voffset = vxi11_obtain_double_value(clink, ":WAV:YORIGIN?");
@@ -289,7 +292,7 @@ long agilent_write_wfi_file(CLINK * clink, char *wfiname, long no_of_bytes,
  * agilent_get_preamble() - or write a wfi file - agilent_write_wfi_file() -
  * make sure that you do this BEFORE you return the scope to automatic mode.
  */
-long agilent_get_screen_data(CLINK * clink, char chan, char *buf,
+long agilent_get_screen_data(VXI11_CLINK * clink, char chan, char *buf,
 			     unsigned long buf_len, unsigned long timeout,
 			     double s_rate, long npoints)
 {
@@ -304,7 +307,7 @@ long agilent_get_screen_data(CLINK * clink, char chan, char *buf,
 /* See comments for above function, and comments within this function, for a
  * description of what it does.
  */
-int agilent_set_for_capture(CLINK * clink, double s_rate, long npoints,
+int agilent_set_for_capture(VXI11_CLINK * clink, double s_rate, long npoints,
 			    unsigned long timeout)
 {
 	long actual_npoints;	/* actual number of points returned */
@@ -338,7 +341,7 @@ int agilent_set_for_capture(CLINK * clink, double s_rate, long npoints,
 		auto_npoints = vxi11_obtain_long_value(clink, ":ACQ:POINTS?");
 
 		/* Set the no of acquisition points to manual */
-		vxi11_send(clink, ":ACQ:POINTS:AUTO 0");
+		vxi11_send_str(clink, ":ACQ:POINTS:AUTO 0");
 
 		if (npoints <= 0) {	// if we've not been passed a value for npoints
 			npoints = auto_npoints;
@@ -348,14 +351,14 @@ int agilent_set_for_capture(CLINK * clink, double s_rate, long npoints,
 		 * number of points. So to get the best xinc value we ask
 		 * for double what we actually want. */
 		sprintf(cmd, ":ACQ:POINTS %ld", (2 * npoints) - 1);
-		vxi11_send(clink, cmd);
+		vxi11_send_str(clink, cmd);
 
 		/* Unfortunately we have to do a :dig, to make sure our changes have
 		 * been registered */
-		vxi11_send(clink, ":DIG");
+		vxi11_send_str(clink, ":DIG");
 
 		/* Find the xincrement is now */
-		xinc = vxi11_obtain_double_value(clink, ":WAV:XINC?", timeout);
+		xinc = vxi11_obtain_double_value_timeout(clink, ":WAV:XINC?", timeout);
 
 		/* Work out the number of points there _should_ be to cover the time range */
 		actual_npoints = (long)((time_range / xinc) + 0.5);
@@ -363,7 +366,7 @@ int agilent_set_for_capture(CLINK * clink, double s_rate, long npoints,
 		/* Set the number of points accordingly. Hopefully the
 		 * xincrement won't have changed! */
 		sprintf(cmd, ":ACQ:POINTS %ld", actual_npoints);
-		vxi11_send(clink, cmd);
+		vxi11_send_str(clink, cmd);
 
 		/* This is a bit anal... we can work out very easily what the equivalent
 		 * sampling rate is (1 / xinc); the scope seems to store this value
@@ -372,7 +375,7 @@ int agilent_set_for_capture(CLINK * clink, double s_rate, long npoints,
 		 * equivalent time mode. Should not be depended upon, though! */
 
 		sprintf(cmd, ":ACQ:SRAT %G", (1 / xinc));
-		vxi11_send(clink, cmd);
+		vxi11_send_str(clink, cmd);
 	}
 
 	/* Real time (RTIM, NORM or PDET) mode: */
@@ -392,7 +395,7 @@ int agilent_set_for_capture(CLINK * clink, double s_rate, long npoints,
 		auto_srat = vxi11_obtain_double_value(clink, ":ACQ:SRAT?");
 
 		/* Set the sample rate (SRAT) and no of acquisition points to manual */
-		vxi11_send(clink, ":ACQ:SRAT:AUTO 0;:ACQ:POINTS:AUTO 0");
+		vxi11_send_str(clink, ":ACQ:SRAT:AUTO 0;:ACQ:POINTS:AUTO 0");
 
 		/* Find out the time range displayed on the screen */
 		time_range = vxi11_obtain_double_value(clink, ":TIM:RANGE?");
@@ -421,7 +424,7 @@ int agilent_set_for_capture(CLINK * clink, double s_rate, long npoints,
 		do {
 			/* Send scope our desired sample rate. */
 			sprintf(cmd, ":ACQ:SRAT %G", s_rate);
-			vxi11_send(clink, cmd);
+			vxi11_send_str(clink, cmd);
 			/* Scope will choose next highest allowed rate.
 			 * Find out what this is */
 			actual_s_rate =
@@ -434,7 +437,7 @@ int agilent_set_for_capture(CLINK * clink, double s_rate, long npoints,
 			/* Note this won't necessarily be the no of points you receive, eg if you have
 			 * sin(x)/x interpolation turned on, you will probably get more. */
 			sprintf(cmd, ":ACQ:POINTS %ld", npoints);
-			vxi11_send(clink, cmd);
+			vxi11_send_str(clink, cmd);
 
 			/* We should do a check, see if there's enough memory */
 			actual_npoints =
@@ -468,9 +471,9 @@ int agilent_set_for_capture(CLINK * clink, double s_rate, long npoints,
 }
 
 /* Return the scope to its auto condition */
-void agilent_set_for_auto(CLINK * clink)
+void agilent_set_for_auto(VXI11_CLINK * clink)
 {
-	vxi11_send(clink, ":ACQ:SRAT:AUTO 1;:ACQ:POINTS:AUTO 1;:RUN");
+	vxi11_send_str(clink, ":ACQ:SRAT:AUTO 1;:ACQ:POINTS:AUTO 1;:RUN");
 }
 
 void agilent_scope_channel_str(char chan, char *source)
@@ -514,13 +517,13 @@ void agilent_scope_channel_str(char chan, char *source)
 /* Wrapper function; implicitely does the :dig command before grabbing the data
  * (safer but possibly slower, if you've already done a dig to get your wfi_file
  * info) */
-long agilent_get_data(CLINK * clink, char chan, char *buf,
+long agilent_get_data(VXI11_CLINK * clink, char chan, char *buf,
 		      unsigned long buf_len, unsigned long timeout)
 {
 	return agilent_get_data(clink, chan, 1, buf, buf_len, timeout);
 }
 
-long agilent_get_data(CLINK * clink, char chan, int digitise, char *buf,
+long agilent_get_data(VXI11_CLINK * clink, char chan, int digitise, char *buf,
 		      unsigned long buf_len, unsigned long timeout)
 {
 	char source[20];
@@ -531,7 +534,7 @@ long agilent_get_data(CLINK * clink, char chan, int digitise, char *buf,
 	memset(source, 0, 20);
 	agilent_scope_channel_str(chan, source);
 	sprintf(cmd, ":WAV:SOURCE %s", source);
-	ret = vxi11_send(clink, cmd);
+	ret = vxi11_send_str(clink, cmd);
 	if (ret < 0) {
 		printf
 		    ("error, could not send :WAV:SOURCE %s cmd, quitting...\n",
@@ -540,11 +543,11 @@ long agilent_get_data(CLINK * clink, char chan, int digitise, char *buf,
 	}
 
 	if (digitise != 0) {
-		ret = vxi11_send(clink, ":DIG");
+		ret = vxi11_send_str(clink, ":DIG");
 	}
 	memset(cmd, 0, 256);
 	do {
-		ret = vxi11_send(clink, ":WAV:DATA?");
+		ret = vxi11_send_str(clink, ":WAV:DATA?");
 		bytes_returned =
 		    vxi11_receive_data_block(clink, buf, buf_len, timeout);
 	} while (bytes_returned == -VXI11_NULL_READ_RESP);
@@ -552,12 +555,12 @@ long agilent_get_data(CLINK * clink, char chan, int digitise, char *buf,
 	return bytes_returned;
 }
 
-int agilent_get_preamble(CLINK * clink, char *buf, unsigned long buf_len)
+int agilent_get_preamble(VXI11_CLINK * clink, char *buf, unsigned long buf_len)
 {
 	int ret;
 	long bytes_returned;
 
-	ret = vxi11_send(clink, ":WAV:PRE?");
+	ret = vxi11_send_str(clink, ":WAV:PRE?");
 	if (ret < 0) {
 		printf("error, could not send :WAV:PRE? cmd, quitting...\n");
 		return ret;
@@ -573,22 +576,22 @@ int agilent_get_preamble(CLINK * clink, char *buf, unsigned long buf_len)
  * is done for limits. If you enter a number greater than the scope it able to 
  * cope with, it (from experience so far) sets the number of averages to its
  * maximum capability. */
-int agilent_set_averages(CLINK * clink, int no_averages)
+int agilent_set_averages(VXI11_CLINK * clink, int no_averages)
 {
 	char cmd[256];
 
 	if (no_averages <= 0) {
-		return vxi11_send(clink, ":ACQ:AVER 0");
+		return vxi11_send_str(clink, ":ACQ:AVER 0");
 	} else {
 		sprintf(cmd, ":ACQ:COUNT %d", no_averages);
-		vxi11_send(clink, cmd);
-		return vxi11_send(clink, ":ACQ:AVER 1");
+		vxi11_send_str(clink, cmd);
+		return vxi11_send_str(clink, ":ACQ:AVER 1");
 	}
 }
 
 /* Gets the number of averages. If acq:aver==0 then returns 0, otherwise
  * returns the actual no of averages. */
-long agilent_get_averages(CLINK * clink)
+long agilent_get_averages(VXI11_CLINK * clink)
 {
 	long result;
 
@@ -600,19 +603,19 @@ long agilent_get_averages(CLINK * clink)
 }
 
 /* Get sample rate. Trivial, but used quite often, so worth a little wrapper fn */
-double agilent_get_sample_rate(CLINK * clink)
+double agilent_get_sample_rate(VXI11_CLINK * clink)
 {
 	return vxi11_obtain_double_value(clink, ":ACQ:SRAT?");
 }
 
 /* Get no of points (may not necessarily relate to no of bytes directly!) */
-long agilent_get_n_points(CLINK * clink)
+long agilent_get_n_points(VXI11_CLINK * clink)
 {
 	return vxi11_obtain_long_value(clink, ":ACQ:POINTS?");
 }
 
 /* Turns a channel on or off (pass "1" for on, "0" for off)*/
-int agilent_display_channel(CLINK * clink, char chan, int on_or_off)
+int agilent_display_channel(VXI11_CLINK * clink, char chan, int on_or_off)
 {
 	char source[20];
 	char cmd[256];
@@ -620,5 +623,5 @@ int agilent_display_channel(CLINK * clink, char chan, int on_or_off)
 	memset(source, 0, 20);
 	agilent_scope_channel_str(chan, source);
 	sprintf(cmd, ":%s:DISP %d", source, on_or_off);
-	return vxi11_send(clink, cmd);
+	return vxi11_send_str(clink, cmd);
 }

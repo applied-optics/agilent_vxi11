@@ -8,7 +8,7 @@ libagilent_user.so.0 : agilent_user.o
 	$(CC) -shared -Wl,-soname,libagilent_user.so.0 $^ -o $@
 
 agilent_user.o: agilent_user.c agilent_user.h
-	$(CC) -fPIC $(CFLAGS) -c $< -o $@
+	$(CXX) -fPIC $(CFLAGS) -c $< -o $@
 
 TAGS: $(wildcard *.c) $(wildcard *.h) $(wildcard *.c)
 	etags $^
