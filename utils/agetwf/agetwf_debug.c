@@ -1,12 +1,3 @@
-/* $Id: agetwf.c,v 1.6 2006/07/07 07:32:07 sds Exp sds $ */
-
-/*
- * $Log: agetwf.c,v $
- * Revision 1.6  2006/07/07 07:32:07  sds
- * added revision info, short description, and GNU GPL license.
- *
- */
-
 /* agetwf.c
  * Copyright (C) 2006 Steve D. Sharples
  *

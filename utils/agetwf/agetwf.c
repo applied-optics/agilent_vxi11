@@ -1,20 +1,3 @@
-/* $Id: agetwf.c,v 1.8 2009/10/16 09:48:48 sds Exp sds $ */
-
-/*
- * $Log: agetwf.c,v $
- * Revision 1.8  2009/10/16 09:48:48  sds
- * Calls the new function agilent_display_channel() to ensure the channel
- * we want to acquire a trace from is turned on.
- *
- * Revision 1.7  2007/10/30 16:22:49  sds
- * changed char*'s in sc() to const char*'s to get rid of
- * pedantic gcc warning.
- *
- * Revision 1.6  2006/07/07 07:32:07  sds
- * added revision info, short description, and GNU GPL license.
- *
- */
-
 /* agetwf.c
  * Copyright (C) 2006 Steve D. Sharples
  *

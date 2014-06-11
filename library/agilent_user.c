@@ -1,25 +1,3 @@
-/* $Id: agilent_user.c,v 1.11 2009/10/16 09:50:45 sds Exp $ */
-
-/*
- * $Log: agilent_user.c,v $
- * Revision 1.11  2009/10/16 09:50:45  sds
- * Added agilent_display_channel() fn, to turn a channel or function
- * on or off.
- *
- * Revision 1.10  2007/01/29 10:02:33  sds
- * added agilent_get_averages() function.
- *
- * Revision 1.9  2006/12/08 12:04:01  ijc
- * in agilent_get_data(), added a check (after :DIG) to see if
- * vxi11_receive_data_block() returns -VXI11_NULL_READ_RESP
- * (meaning instrument has ignored query but not returned a
- * proper error). If so, has another go.
- *
- * Revision 1.8  2006/07/06 21:16:39  sds
- * added revision info, short description, and GNU GPL license.
- *
- */
-
 /* agilent_user.c
  * Copyright (C) 2006 Steve D. Sharples
  *
