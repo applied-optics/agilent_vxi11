@@ -36,7 +36,10 @@
  * The author's email address is steve.sharples@nottingham.ac.uk
  */
 
-#include "../../library/agilent_user.h"
+#include <stdio.h>
+#include <string.h>
+
+#include "agilent_user.h"
 
 #ifndef	BOOL
 #define	BOOL	int
@@ -48,13 +51,13 @@
 #define	FALSE	0
 #endif
 
-BOOL sc(char *, char *);
+BOOL sc(const char *, const char *);
 
 int main(int argc, char *argv[])
 {
 
 	static char *progname;
-	static char *serverIP;
+	static const char *serverIP = NULL;
 	char chnl;		/* we use '1' to '4' for channels, and 'A' to 'D' for FUNC[1...4] */
 	FILE *f_wf;
 	char wfname[256];
@@ -75,9 +78,8 @@ int main(int argc, char *argv[])
 	long npoints = 0;
 	double actual_s_rate;
 	long actual_npoints;
-	CLINK *clink;		/* client link (actually a structure contining CLIENT and VXI11_LINK pointers) */
+	VXI11_CLINK *clink;		/* client link (actually a structure contining CLIENT and VXI11_LINK pointers) */
 
-	clink = new CLINK;	/* allocate some memory */
 	progname = argv[0];
 
 	got_file = TRUE;
@@ -86,7 +88,6 @@ int main(int argc, char *argv[])
 
 	snprintf(wfname, 256, "%s.wf", "test");
 	snprintf(wfiname, 256, "%s.wf", "test");
-	serverIP = "128.243.74.232";
 	chnl = '1';
 	no_averages = 1024;
 	got_no_averages = TRUE;
@@ -165,15 +166,18 @@ int main(int argc, char *argv[])
 		printf("%s -ip 128.243.74.232 -f test -c 2 -s 1e9\n", progname);
 		exit(1);
 	}
+	if(!serverIP){
+		serverIP = "128.243.74.232";
+	}
 
 	f_wf = fopen(wfname, "w");
 	if (f_wf > 0) {
 		/* This utility illustrates the general idea behind how data is acquired.
 		 * First we open the device, referenced by an IP address, and obtain
-		 * a client id, and a link id, all contained in a "CLINK" structure.  Each
+		 * a client id, and a link id, all contained in a "VXI11_CLINK" structure.  Each
 		 * client can have more than one link. For simplicity we bundle them together. */
 
-		if (agilent_open(serverIP, clink) != 0) {	// could also use "vxi11_open_device()"
+		if (agilent_open(&clink, serverIP) != 0) {	// could also use "vxi11_open_device()"
 			printf("Quitting...\n");
 			exit(2);
 		}
@@ -263,7 +267,7 @@ int main(int argc, char *argv[])
 		delete[]buf;
 
 		/* Finally we sever the link to the client. */
-		agilent_close(serverIP, clink);	// could also use "vxi11_close_device()"
+		agilent_close(clink, serverIP);	// could also use "vxi11_close_device()"
 	} else {
 		printf("error: could not open file for writing, quitting...\n");
 		exit(3);
@@ -295,7 +299,7 @@ int main(int argc, char *argv[])
  */
 
 /* string compare (sc) function for parsing... ignore */
-BOOL sc(char *con, char *var)
+BOOL sc(const char *con, const char *var)
 {
 	if (strcmp(con, var) == 0) {
 		return TRUE;

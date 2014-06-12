@@ -28,7 +28,10 @@
  * The author's email address is steve.sharples@nottingham.ac.uk
  */
 
-#include "../../library/agilent_user.h"
+#include <stdio.h>
+#include <string.h>
+
+#include "agilent_user.h"
 #define BUF_LEN 30000
 
 int main(int argc, char *argv[])
@@ -39,9 +42,8 @@ int main(int argc, char *argv[])
 	char buf[BUF_LEN];
 	FILE *fi;
 	long bytes_returned;
-	CLINK *clink;
+	VXI11_CLINK *clink;
 
-	clink = new CLINK;
 	if (argc != 3) {
 		printf("usage: %s www.xxx.yyy.zzz filename.ass\n", argv[0]);
 		printf
@@ -56,14 +58,14 @@ int main(int argc, char *argv[])
 		bytes_returned = fread(buf, sizeof(char), BUF_LEN, fi);
 		fclose(fi);
 
-		if (agilent_open(device_ip, clink) != 0) {
+		if (agilent_open(&clink, device_ip) != 0) {
 			printf("Quitting...\n");
 			exit(2);
 		}
 
 		agilent_send_setup(clink, buf, bytes_returned);
 
-		agilent_close(device_ip, clink);
+		agilent_close(clink, device_ip);
 	} else {
 		printf("error: could not open file for reading, quitting...\n");
 		exit(3);

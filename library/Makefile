@@ -5,7 +5,7 @@ include ../config.mk
 all : libagilent_user.so.0
 
 libagilent_user.so.0 : agilent_user.o
-	$(CC) -shared -Wl,-soname,libagilent_user.so.0 $^ -o $@
+	$(CC) -shared -Wl,-soname,libagilent_user.so.0 $^ -o $@ -lvxi11
 
 agilent_user.o: agilent_user.c agilent_user.h
 	$(CXX) -fPIC $(CFLAGS) -c $< -o $@

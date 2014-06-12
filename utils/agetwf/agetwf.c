@@ -36,7 +36,10 @@
  * The author's email address is steve.sharples@nottingham.ac.uk
  */
 
-#include "../../library/agilent_user.h"
+#include <stdio.h>
+#include <string.h>
+
+#include "agilent_user.h"
 
 #ifndef	BOOL
 #define	BOOL	int
@@ -77,11 +80,10 @@ int main(int argc, char *argv[])
 	long npoints = 0;
 	double actual_s_rate;
 	long actual_npoints;
-	CLINK *clink;		/* client link (actually a structure contining CLIENT and VXI11_LINK pointers) */
+	VXI11_CLINK *clink;		/* client link (actually a structure contining CLIENT and VXI11_LINK pointers) */
 	int l;
 	char cmd[256];
 
-	clink = new CLINK;	/* allocate some memory */
 	progname = argv[0];
 
 	while (index < argc) {
@@ -170,10 +172,10 @@ int main(int argc, char *argv[])
 	if (f_wf > 0) {
 		/* This utility illustrates the general idea behind how data is acquired.
 		 * First we open the device, referenced by an IP address, and obtain
-		 * a client id, and a link id, all contained in a "CLINK" structure.  Each
+		 * a client id, and a link id, all contained in a "VXI11_CLINK" structure.  Each
 		 * client can have more than one link. For simplicity we bundle them together. */
 
-		if (agilent_open(serverIP, clink) != 0) {	// could also use "vxi11_open_device()"
+		if (agilent_open(&clink, serverIP) != 0) {	// could also use "vxi11_open_device()"
 			printf("Quitting...\n");
 			exit(2);
 		}
@@ -256,14 +258,14 @@ int main(int argc, char *argv[])
 			    agilent_write_wfi_file(clink, wfiname, chnl,
 						   progname, no_segments,
 						   timeout);
-			vxi11_send(clink, ":ACQ:MODE SEGMENTED");
+			vxi11_send_str(clink, ":ACQ:MODE SEGMENTED");
 			sprintf(cmd, ":ACQ:SEGM:COUNT %d", no_segments);
-			vxi11_send(clink, cmd);
+			vxi11_send_str(clink, cmd);
 			buf = new char[buf_size * no_segments];
 
 			for (l = 0; l < no_segments; l++) {
 				sprintf(cmd, ":ACQ:SEGM:INDEX %d", l + 1);
-				vxi11_send(clink, cmd);
+				vxi11_send_str(clink, cmd);
 				bytes_returned =
 				    agilent_get_data(clink, chnl, 0,
 						     buf + (l * buf_size),
@@ -302,7 +304,7 @@ int main(int argc, char *argv[])
 		delete[]buf;
 
 		/* Finally we sever the link to the client. */
-		agilent_close(serverIP, clink);	// could also use "vxi11_close_device()"
+		agilent_close(clink, serverIP);	// could also use "vxi11_close_device()"
 	} else {
 		printf("error: could not open file for writing, quitting...\n");
 		exit(3);

@@ -1,4 +1,8 @@
-#include "../../library/agilent_user.h"
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
+#include "agilent_user.h"
 
 int main(int argc, char *argv[])
 {
@@ -6,9 +10,7 @@ int main(int argc, char *argv[])
 	static char *device_ip;
 	int ret = 0;
 	int n;
-	CLINK *clink;
-
-	clink = new CLINK;
+	VXI11_CLINK *clink;
 
 	if (argc < 2) {
 		printf("usage: %s 128.243.74.106 (or other IP address) then optionally a number N.\n",
@@ -24,7 +26,7 @@ int main(int argc, char *argv[])
 	else
 		n = -1;
 
-	if (vxi11_open_device(device_ip, clink) != 0) {
+	if (vxi11_open_device(&clink, device_ip, NULL) != 0) {
 		printf("Quitting...\n");
 		exit(2);
 	}
@@ -38,5 +40,5 @@ int main(int argc, char *argv[])
 			sleep(2);
 	}
 
-	vxi11_close_device(device_ip, clink);
+	vxi11_close_device(clink, device_ip);
 }

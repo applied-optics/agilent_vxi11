@@ -1,4 +1,7 @@
-#include "../../library/agilent_user.h"
+#include <stdio.h>
+#include <string.h>
+
+#include "agilent_user.h"
 
 #ifndef	BOOL
 #define	BOOL	int
@@ -10,7 +13,7 @@
 #define	FALSE	0
 #endif
 
-BOOL sc(char *, char *);
+BOOL sc(const char *, const char *);
 
 int main(int argc, char *argv[])
 {
@@ -37,20 +40,10 @@ int main(int argc, char *argv[])
 	long npoints = 0;
 	double actual_s_rate;
 	long actual_npoints;
-	CLINK *clink;		/* client link (actually a structure contining CLIENT and VXI11_LINK pointers) */
-	CLINK *clink2;
+	VXI11_CLINK *clink;		/* client link (actually a structure contining CLIENT and VXI11_LINK pointers) */
+	VXI11_CLINK *clink2;
 	char locbuf[256];
-	CLIENT *client;
-	VXI11_LINK *link1;
-	VXI11_LINK *link2;
 	int ret;
-	CLIENT *client_addr;
-	clink = new CLINK;	/* allocate some memory */
-	clink2 = new CLINK;	/* allocate some memory */
-
-	//client        = new CLIENT;
-	//link1 = new VXI11_LINK;
-	//link2 = new VXI11_LINK;
 
 	progname = argv[0];
 
@@ -121,16 +114,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-/*	if (vxi11_open_device(serverIP, &client, &link1) != 0) {
-		printf("Quitting...\n");
-		exit(2);
-		}
-	client_addr = client;
-	clink->client=client_addr;
-	clink->link=link1;
-	printf("client = %ld, client_addr=%ld, clink->client=%ld\n",client, client_addr, clink->client);
-*/
-	if (vxi11_open_device(serverIP, clink) != 0) {
+	if (vxi11_open_device(&clink, serverIP, NULL) != 0) {
 		printf("Quitting...\n");
 		exit(2);
 	}
@@ -149,7 +133,7 @@ int main(int argc, char *argv[])
 	clink2->client=client;
 	clink2->link=link2;
 */
-	if (vxi11_open_device(serverIP, clink2) != 0) {
+	if (vxi11_open_device(&clink2, serverIP, NULL) != 0) {
 		printf("Quitting...\n");
 		exit(2);
 	}
@@ -180,11 +164,8 @@ int main(int argc, char *argv[])
 	       actual_s_rate, (actual_s_rate / 1e9), actual_npoints);
 
 	/* Finally we sever the link to the client. */
-	//      vxi11_close_link(serverIP,client, link1);
-	//      vxi11_close_device(serverIP,client, link1);
-	//      vxi11_close_device(serverIP,client, link2);
-	vxi11_close_device(serverIP, clink);
-	vxi11_close_device(serverIP, clink2);
+	vxi11_close_device(clink, serverIP);
+	vxi11_close_device(clink2, serverIP);
 }
 
 /* Extra notes:
@@ -212,7 +193,7 @@ int main(int argc, char *argv[])
  */
 
 /* string compare (sc) function for parsing... ignore */
-BOOL sc(char *con, char *var)
+BOOL sc(const char *con, const char *var)
 {
 	if (strcmp(con, var) == 0) {
 		return TRUE;
