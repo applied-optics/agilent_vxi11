@@ -6,7 +6,7 @@ all:	agilent_debug
 .PHONY:	all clean install
 
 agilent_debug: debug.o ../../library/$(full_libname)
-	$(CXX) $(LDFLAGS) -o $@ $^
+	$(CXX) $(LDFLAGS) -o $@ $^ -lvxi11
 
 debug.o: debug.c ../../library/$(full_libname)
 	$(CXX) $(CFLAGS) -c -o $@ $<
