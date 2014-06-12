@@ -1,1 +1,9 @@
 *.o
+*~
+library/libagilent_user.so*
+utils/agetwf/agetwf
+utils/agetwf/agetwf_debug
+utils/agilent_load_save_setup/agilent_load_setup
+utils/agilent_load_save_setup/agilent_save_setup
+utils/agilent_report_status/agilent_report_status
+utils/test/agilent_debug
