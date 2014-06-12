@@ -5,7 +5,7 @@ include ../config.mk
 all : $(full_libname)
 
 $(full_libname) : agilent_vxi11.o
-	$(CC) -shared -Wl,-soname,$(full_libname) $^ -o $@ -lvxi11
+	$(CXX) -shared -Wl,-soname,$(full_libname) $^ -o $@ -lvxi11
 
 agilent_vxi11.o: agilent_vxi11.c agilent_vxi11.h
 	$(CXX) -fPIC $(CFLAGS) -c $< -o $@
