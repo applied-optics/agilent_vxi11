@@ -258,14 +258,12 @@ int main(int argc, char *argv[])
 			    agilent_write_wfi_file(clink, wfiname, chnl,
 						   progname, no_segments,
 						   timeout);
-			vxi11_send_str(clink, ":ACQ:MODE SEGMENTED");
-			sprintf(cmd, ":ACQ:SEGM:COUNT %d", no_segments);
-			vxi11_send_str(clink, cmd);
+			vxi11_send_sprintf(clink, ":ACQ:MODE SEGMENTED");
+			vxi11_send_sprintf(clink, ":ACQ:SEGM:COUNT %d", no_segments);
 			buf = new char[buf_size * no_segments];
 
 			for (l = 0; l < no_segments; l++) {
-				sprintf(cmd, ":ACQ:SEGM:INDEX %d", l + 1);
-				vxi11_send_str(clink, cmd);
+				vxi11_send_sprintf(clink, ":ACQ:SEGM:INDEX %d", l + 1);
 				bytes_returned =
 				    agilent_get_data(clink, chnl, 0,
 						     buf + (l * buf_size),
