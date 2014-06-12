@@ -1,4 +1,9 @@
 ------------------------------------------------------------------------------
+agilent_scope_1.03 - 2014-06-12
+
+Turn into shared library. Rename of header file to agilent_vxi11.h.
+
+------------------------------------------------------------------------------
 agilent_scope_1.02 - 16/10/2009
 
 Extra function: agilent_display_channel(). Allows you to turn on or off a
