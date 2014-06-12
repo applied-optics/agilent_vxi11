@@ -12,7 +12,7 @@
  * the same wf file.
  *
  * The source is extensively commented and from this, and a look at the 
- * agilent_user.c library, you will begin to understand the approach to 
+ * agilent_vxi11.c library, you will begin to understand the approach to 
  * acquiring data that I've taken.
  *
  * You will also need the
@@ -39,7 +39,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "agilent_user.h"
+#include "agilent_vxi11.h"
 
 #ifndef	BOOL
 #define	BOOL	int

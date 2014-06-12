@@ -5,16 +5,16 @@ CFLAGS:=$(CFLAGS) -I../../library
 all:	agilent_load_setup agilent_save_setup
 .PHONY:	all clean install
 
-agilent_load_setup: agilent_load_setup.o ../../library/libagilent_user.so.0
+agilent_load_setup: agilent_load_setup.o ../../library/$(full_libname)
 	$(CXX) $(LDFLAGS) -o $@ $^
 
-agilent_load_setup.o: agilent_load_setup.c ../../library/libagilent_user.so.0
+agilent_load_setup.o: agilent_load_setup.c ../../library/$(full_libname)
 	$(CXX) $(CFLAGS) -c $< -o $@
 
-agilent_save_setup: agilent_save_setup.o ../../library/libagilent_user.so.0
+agilent_save_setup: agilent_save_setup.o ../../library/$(full_libname)
 	$(CXX) $(LDFLAGS) -o $@ $^
 
-agilent_save_setup.o: agilent_save_setup.c ../../library/libagilent_user.so.0
+agilent_save_setup.o: agilent_save_setup.c ../../library/$(full_libname)
 	$(CXX) $(CFLAGS) -c $< -o $@
 
 clean:

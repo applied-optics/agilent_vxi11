@@ -5,16 +5,16 @@ CFLAGS:=$(CFLAGS) -I../../library
 all:	agetwf agetwf_debug
 .PHONY:	all clean install
 
-agetwf: agetwf.o ../../library/libagilent_user.so.0
+agetwf: agetwf.o ../../library/$(full_libname)
 	$(CXX) $(LDFLAGS) -o $@ $^
 
-agetwf.o: agetwf.c ../../library/libagilent_user.so.0
+agetwf.o: agetwf.c ../../library/$(full_libname)
 	$(CXX) $(CFLAGS) -c -o $@ $<
 
-agetwf_debug: agetwf_debug.o ../../library/libagilent_user.so.0
+agetwf_debug: agetwf_debug.o ../../library/$(full_libname)
 	$(CXX) $(LDFLAGS) -o $@ $^
 
-agetwf_debug.o: agetwf_debug.c ../../library/libagilent_user.so.0
+agetwf_debug.o: agetwf_debug.c ../../library/$(full_libname)
 	$(CXX) $(CFLAGS) -c -o $@ $<
 
 clean:

@@ -1,4 +1,4 @@
-/* agilent_user.c
+/* agilent_vxi11.c
  * Copyright (C) 2006 Steve D. Sharples
  *
  * User library of useful functions for talking to Agilent Infiniium
@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "agilent_user.h"
+#include "agilent_vxi11.h"
 
 /* This really is just a wrapper. Only here because folk might be uncomfortable
  * using commands from the vxi11_user library directly! */

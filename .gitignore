@@ -1,6 +1,6 @@
 *.o
 *~
-library/libagilent_user.so*
+library/libagilent_vxi11.so*
 utils/agetwf/agetwf
 utils/agetwf/agetwf_debug
 utils/agilent_load_save_setup/agilent_load_setup

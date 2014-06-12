@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "agilent_user.h"
+#include "agilent_vxi11.h"
 #define BUF_LEN 30000
 
 int main(int argc, char *argv[])

@@ -5,10 +5,10 @@ CFLAGS:=$(CFLAGS) -I../../library
 all:	agilent_debug
 .PHONY:	all clean install
 
-agilent_debug: debug.o ../../library/libagilent_user.so.0
+agilent_debug: debug.o ../../library/$(full_libname)
 	$(CXX) $(LDFLAGS) -o $@ $^
 
-debug.o: debug.c ../../library/libagilent_user.so.0
+debug.o: debug.c ../../library/$(full_libname)
 	$(CXX) $(CFLAGS) -c -o $@ $<
 
 clean:

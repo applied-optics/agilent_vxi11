@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "agilent_user.h"
+#include "agilent_vxi11.h"
 
 #ifndef	BOOL
 #define	BOOL	int

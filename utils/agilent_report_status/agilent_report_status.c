@@ -2,7 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "agilent_user.h"
+#include "agilent_vxi11.h"
 
 int main(int argc, char *argv[])
 {
