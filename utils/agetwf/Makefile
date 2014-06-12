@@ -6,13 +6,13 @@ all:	agetwf agetwf_debug
 .PHONY:	all clean install
 
 agetwf: agetwf.o ../../library/$(full_libname)
-	$(CXX) $(LDFLAGS) -o $@ $^
+	$(CXX) $(LDFLAGS) -o $@ $^ -lvxi11
 
 agetwf.o: agetwf.c ../../library/$(full_libname)
 	$(CXX) $(CFLAGS) -c -o $@ $<
 
 agetwf_debug: agetwf_debug.o ../../library/$(full_libname)
-	$(CXX) $(LDFLAGS) -o $@ $^
+	$(CXX) $(LDFLAGS) -o $@ $^ -lvxi11
 
 agetwf_debug.o: agetwf_debug.c ../../library/$(full_libname)
 	$(CXX) $(CFLAGS) -c -o $@ $<
