@@ -1,4 +1,10 @@
 ------------------------------------------------------------------------------
+agilent_scope_1.04 - 2014-07-17
+
+Update to use vxi11-1.12.
+Add Python version of library.
+
+------------------------------------------------------------------------------
 agilent_scope_1.03 - 2014-06-12
 
 Turn into shared library. Rename of header file to agilent_vxi11.h.

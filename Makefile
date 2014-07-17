@@ -1,4 +1,4 @@
-VERSION=1.03
+VERSION=1.04
 
 include config.mk
 
