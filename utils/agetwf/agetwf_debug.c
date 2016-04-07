@@ -231,7 +231,11 @@ int main(int argc, char *argv[])
 		buf_size =
 		    agilent_write_wfi_file(clink, wfiname, chnl, progname, 1,
 					   timeout);
-		buf = new char[buf_size];
+		buf = malloc(buf_size);
+		if (!buf) {
+			printf("Error: Out of memory.\n");
+			exit(2);
+		}
 
 		/* This is where we transfer the data from the scope to the PC. Note the
 		 * fourth argument, "0"; this tells the function not to do a digitisation.
@@ -264,7 +268,7 @@ int main(int argc, char *argv[])
 		agilent_set_for_auto(clink);
 		fwrite(buf, sizeof(char), bytes_returned, f_wf);
 		fclose(f_wf);
-		delete[]buf;
+		free(buf);
 
 		/* Finally we sever the link to the client. */
 		agilent_close(clink, serverIP);	// could also use "vxi11_close_device()"
@@ -282,7 +286,7 @@ int main(int argc, char *argv[])
 	agilent_init(clink);
 	agilent_set_for_capture(clink, s_rate, npoints, timeout);
 	buf_size = agilent_calculate_no_of_bytes(clink, chnl, timeout); // performs :DIG
-	buf = new char[buf_size];
+	buf = malloc(buf_size);
 	count=0;
 	do { // note for first acquisition no :DIG is done, then it is for each one after
 		bytes_returned = agilent_get_data(clink, chnl, count++, buf, buf_size, timeout);
@@ -294,7 +298,7 @@ int main(int argc, char *argv[])
 	// since the last acquisition)
 	ret = agilent_write_wfi_file(clink, wfiname, buf_size, progname, count, timeout);
 	agilent_set_for_auto(clink);
-	delete[] buf;
+	free(buf);
 	agilent_close(serverIP,clink);
  */
 
